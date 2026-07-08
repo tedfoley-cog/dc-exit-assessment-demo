@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Migration-Readiness Assessment — Demo Flow</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #f5f7fa;
+      color: #1e293b;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      width: 100%;
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+      color: #fff;
+      text-align: center;
+      padding: 2rem 1rem 1.75rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,.15);
+    }
+    header h1 {
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    header p {
+      margin-top: .5rem;
+      font-size: .95rem;
+      color: #94a3b8;
+    }
+
+    main {
+      flex: 1;
+      width: 100%;
+      max-width: 1400px;
+      padding: 2rem 1rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    #flowchart { width: 100%; overflow-x: auto; }
+    .mermaid svg { margin: 0 auto; display: block; }
+
+    .legend {
+      width: 100%;
+      max-width: 1400px;
+      padding: 0 1rem 2.5rem;
+    }
+    .legend-inner {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1.25rem 1.75rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      align-items: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,.06);
+    }
+    .legend-title {
+      font-weight: 600;
+      font-size: .85rem;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: #64748b;
+      margin-right: .5rem;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: .45rem;
+      font-size: .85rem;
+      color: #334155;
+    }
+    .legend-swatch {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    footer {
+      width: 100%;
+      text-align: center;
+      padding: 1rem;
+      font-size: .8rem;
+      color: #94a3b8;
+      border-top: 1px solid #e2e8f0;
+      background: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Migration-Readiness Assessment &mdash; Demo Flow</h1>
+    <p>Parallel Devin sessions assess a legacy tranche and produce the factory's work queue &mdash; read-only access, under an hour</p>
+  </header>
+
+  <main>
+    <div id="flowchart">
+      <pre class="mermaid">
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'primaryColor':      '#dbeafe',
+    'primaryTextColor':  '#1e293b',
+    'primaryBorderColor':'#3b82f6',
+    'lineColor':         '#64748b',
+    'fontSize':          '14px'
+  },
+  'flowchart': {
+    'useMaxWidth': false,
+    'htmlLabels': false,
+    'padding': 20,
+    'nodeSpacing': 30,
+    'rankSpacing': 40
+  }
+}}%%
+flowchart TD
+  TRANCHE[Portfolio Tranche]
+  KICKOFF[Kick Off Parallel Sessions]
+
+  subgraph JAVA [Session 1]
+    direction TB
+    J1[Index Struts App]
+    J2[Apply Readiness Rules]
+    J3[Write Readout PR]
+    J1 --> J2 --> J3
+  end
+
+  subgraph CF [Session 2]
+    direction TB
+    C1[Index ColdFusion App]
+    C2[Apply Readiness Rules]
+    C3[Write Readout PR]
+    C1 --> C2 --> C3
+  end
+
+  subgraph COBOL [Session 3]
+    direction TB
+    B1[Index COBOL Batch]
+    B2[Apply Readiness Rules]
+    B3[Write Readout PR]
+    B1 --> B2 --> B3
+  end
+
+  WIKI[DeepWiki Pages]
+  AGG[Aggregate Portfolio Table]
+  DISP[Dispositions and Backlogs]
+  QUEUE[Factory Work Queue]
+
+  TRANCHE -- portfolio.yaml --> KICKOFF
+  KICKOFF --> J1
+  KICKOFF --> C1
+  KICKOFF --> B1
+  J1 -. architecture wiki .-> WIKI
+  C1 -. architecture wiki .-> WIKI
+  B1 -. architecture wiki .-> WIKI
+  J3 --> AGG
+  C3 --> AGG
+  B3 --> AGG
+  AGG -- portfolio report --> DISP
+  DISP -- remediation items --> QUEUE
+
+  classDef trigger   fill:#d1fae5,stroke:#059669,stroke-width:2px,color:#064e3b
+  classDef kickoff   fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81
+  classDef pipeline  fill:#f0f9ff,stroke:#0ea5e9,stroke-width:1.5px,color:#0c4a6e
+  classDef wiki      fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#581c87
+  classDef result    fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#78350f
+  classDef nextstep  fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+
+  class TRANCHE trigger
+  class KICKOFF kickoff
+  class J1,J2,J3,C1,C2,C3,B1,B2,B3 pipeline
+  class WIKI wiki
+  class AGG,DISP result
+  class QUEUE nextstep
+      </pre>
+    </div>
+  </main>
+
+  <section class="legend">
+    <div class="legend-inner">
+      <span class="legend-title">Legend</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#d1fae5;border:2px solid #059669;"></span> Input Tranche</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#e0e7ff;border:2px solid #6366f1;"></span> Session Kickoff</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#f0f9ff;border:2px solid #0ea5e9;"></span> Assessment Step (per Devin session)</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#f3e8ff;border:2px solid #a855f7;"></span> DeepWiki Output</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#fef3c7;border:2px solid #f59e0b;"></span> Assessment Artifact</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#fee2e2;border:2px solid #ef4444;"></span> Paid Next Step</span>
+    </div>
+  </section>
+
+  <footer>
+    Data Center Exit &mdash; Migration-Readiness Assessment Demo &copy; 2026 &middot; Read-only assessment &middot; Rehost / Replatform / Refactor / Retire / Replace
+  </footer>
+
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({
+      startOnLoad: true,
+      securityLevel: 'loose',
+      flowchart: {
+        htmlLabels: false,
+        curve: 'basis',
+        useMaxWidth: false
+      }
+    });
+  </script>
+</body>
+</html>

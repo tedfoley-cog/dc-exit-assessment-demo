@@ -1,0 +1,23 @@
+# First assessment tranche — representative slice of the custom estate.
+# Each entry becomes one parallel Devin assessment session.
+tranche: wave-0-pilot
+target_landing_zone: mission-ready-cloud
+apps:
+  - id: sqp
+    name: Supplier Quality Portal
+    repo: https://github.com/tedfoley-cog/legacy-supplier-portal
+    stack: Java 7 / Struts 1.2 / Tomcat 6 / MySQL 5.5
+    business_owner: Supplier Quality Engineering
+    criticality: high
+  - id: facwo
+    name: Facilities Work Order Tracker
+    repo: https://github.com/tedfoley-cog/legacy-workorder-cf
+    stack: Adobe ColdFusion 9 / Windows 2008 R2 / Oracle 11g
+    business_owner: Plant Facilities
+    criticality: medium
+  - id: matl
+    name: Materials Inventory Batch
+    repo: https://github.com/tedfoley-cog/legacy-inventory-cobol
+    stack: Enterprise COBOL 4.2 / z/OS 2.3 / VSAM / CA-7
+    business_owner: Materials Management
+    criticality: high

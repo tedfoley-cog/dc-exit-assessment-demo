@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Lint
+        run: |
+          pip install -q ruff pyyaml
+          ruff check scripts/
+      - name: Validate YAML
+        run: |
+          python -c "import yaml; yaml.safe_load(open('portfolio.yaml')); yaml.safe_load(open('rules/cloud-readiness-rules.yaml'))"
+      - name: Aggregator smoke test
+        run: |
+          mkdir -p assessment/readouts
+          printf -- '---\napp_id: test\napp_name: Test App\nstack: Java\ndisposition: refactor\nblockers: 3\nmajors: 2\nbacklog_items: 5\n---\n# Readout\n' > assessment/readouts/test.md
+          python scripts/aggregate_readouts.py
+          test -f assessment/portfolio_report.html

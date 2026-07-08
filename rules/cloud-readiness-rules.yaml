@@ -1,0 +1,84 @@
+# Cloud-readiness ruleset applied by each assessment session.
+# Modeled on Konveyor analyzer rule categories; MRC-specific standards
+# slot in as additional rules with the `mrc-` prefix.
+#
+# severity: blocker  = must be remediated before this app can land in cloud
+#           major    = should be remediated during migration
+#           minor    = record and defer
+ruleset: cloud-readiness-v1
+rules:
+  - id: eol-runtime
+    severity: blocker
+    category: runtime-debt
+    description: >
+      Application runtime (language version, app server, OS) is past end
+      of support. Examples: Java 6/7/8, Tomcat 6, ColdFusion 9,
+      Windows Server 2008, Enterprise COBOL 4.x.
+    evidence: build files, deployment descriptors, README runtime sections
+
+  - id: vulnerable-dependency
+    severity: blocker
+    category: dependency-debt
+    description: >
+      Direct dependency with published CVEs or past end of life.
+      Examples: Struts 1.x (EOL 2008, multiple unfixable CVEs),
+      log4j 1.x (CVE-2019-17571), commons-fileupload < 1.3.3
+      (CVE-2016-1000031), commons-collections 3.2.1 (CVE-2015-6420).
+    evidence: pom.xml / build.gradle / lib directories
+
+  - id: hardcoded-endpoint
+    severity: blocker
+    category: environmental-coupling
+    description: >
+      Hostnames, IPs, JDBC URLs, SMTP relays, FTP servers, or UNC paths
+      hardcoded in source. Each one breaks when the data center goes dark.
+    evidence: grep for corp domain names, jdbc:, smtp, ftp, UNC paths
+
+  - id: local-filesystem-coupling
+    severity: major
+    category: environmental-coupling
+    description: >
+      Reads/writes to local disk or NFS/SMB mounts that assume a specific
+      server: upload directories, batch drop zones, report shares.
+    evidence: file I/O against absolute paths, cffile/cfftp, JCL DSNs
+
+  - id: plaintext-credentials
+    severity: blocker
+    category: security
+    description: >
+      Credentials committed in source or config: DB passwords, FTP
+      passwords, service accounts.
+    evidence: config constants, JCL FTP steps, CFML datasource/ftp tags
+
+  - id: os-scheduled-job
+    severity: major
+    category: environmental-coupling
+    description: >
+      Batch orchestration outside the app: cron entries, CF Administrator
+      scheduled tasks, CA-7 job schedules. Must map to cloud-native
+      scheduling during migration.
+    evidence: code comments, README operational notes, JCL
+
+  - id: sql-injection
+    severity: major
+    category: security
+    description: >
+      SQL assembled by string concatenation from user input. Threat-surface
+      reduction is in scope for every migration.
+    evidence: DAO/query source
+
+  - id: missing-test-coverage
+    severity: major
+    category: test-debt
+    description: >
+      No automated test suite. Characterization tests are phase zero of
+      any remediation; estimate the effort in the backlog.
+    evidence: absence of test directories/frameworks; README statements
+
+  - id: shared-database
+    severity: minor
+    category: environmental-coupling
+    description: >
+      Schema shared with other applications or integration by database
+      link / shared extract files.
+    evidence: README integration notes, extract jobs
