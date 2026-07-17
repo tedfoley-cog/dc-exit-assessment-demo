@@ -25,7 +25,7 @@ The Supplier Quality Portal (SQP) is an internal Struts 1.2 web application used
 | vulnerable-dependency | blocker | 5 findings. Struts 1.2.9 (EOL 2008, unfixable CVEs incl. CVE-2014-0114 via beanutils); log4j 1.2.17 (CVE-2019-17571); commons-fileupload 1.2.1 (CVE-2016-1000031 RCE, CVE-2014-0050); commons-beanutils 1.8.0 (CVE-2014-0114); commons-collections 3.2.1 (CVE-2015-6420 deserialization RCE). | `pom.xml:21-25`, `pom.xml:38-42`, `pom.xml:43-47`, `pom.xml:48-52`, `pom.xml:53-57` |
 | hardcoded-endpoint | blocker | 3 findings. JDBC URL to `dc1-mysql-prd03.corp.meridianaero.com:3306`; SMTP relay `dc1-smtp-relay01.corp.meridianaero.com:25`; SOAP WSDL on `dc1-wls-app07.corp.meridianaero.com:7001` (Supplier Master, WebLogic 10.3). All are compile-time constants — every one dies when DC1 goes dark. | `src/main/java/com/meridianaero/sqp/util/AppConfig.java:10-11`, `:16-17`, `:27-28` |
 | local-filesystem-coupling | major | 3 findings. Nightly export writes to NFS mount `/mnt/dc1-nfs02/erp_inbound/sqp`; uploads stored on local disk `/opt/apps/sqp/uploads` (on the TSM backup schedule); log4j writes to `/opt/apps/sqp/logs/sqp.log`. | `src/main/java/com/meridianaero/sqp/util/AppConfig.java:21`, `:24`; `src/main/java/com/meridianaero/sqp/action/NightlyExportAction.java:39-40`; `src/main/java/com/meridianaero/sqp/action/ReportUploadAction.java:34-45`; `src/main/resources/log4j.properties:4`; `README.md:26-31` |
-| plaintext-credentials | blocker | 1 finding. Production DB password `Sqp$Prd2014` for user `sqp_app` committed as a source constant. | `src/main/java/com/meridianaero/sqp/util/AppConfig.java:12-13` |
+| plaintext-credentials | blocker | 1 finding. Production DB password for user `sqp_app` committed as a source constant (value redacted here; see evidence). | `src/main/java/com/meridianaero/sqp/util/AppConfig.java:12-13` |
 | os-scheduled-job | major | 1 finding. Cron entry on the app server curls `nightlyExport.do` at 02:15 to produce the ERP extract (`15 2 * * * curl -s http://localhost:8080/sqp/nightlyExport.do`). Orchestration lives outside the app and must map to cloud-native scheduling. | `src/main/java/com/meridianaero/sqp/action/NightlyExportAction.java:23-26`; `README.md:26-28` |
 | sql-injection | major | 3 findings. Login query concatenates username/password directly into SQL (auth bypass via `' OR '1'='1`); escape search concatenates supplierCode/status; findById concatenates the id. All use `Statement`, no `PreparedStatement` anywhere. | `src/main/java/com/meridianaero/sqp/action/LoginAction.java:29-31`; `src/main/java/com/meridianaero/sqp/dao/EscapeDAO.java:24-33`, `:55-57` |
 | missing-test-coverage | major | 1 finding. No test directory, no test framework in `pom.xml`, and the README states regression checks are manual against the QA instance. | absence of `src/test/`; `pom.xml:20-68` (no test deps); `README.md:33-34` |
@@ -37,10 +37,10 @@ The Supplier Quality Portal (SQP) is an internal Struts 1.2 web application used
 
 | Endpoint | DC server | Evidence |
 |---|---|---|
-| `jdbc:mysql://dc1-mysql-prd03.corp.meridianaero.com:3306/sqp_prod` | dc1-mysql-prd03 (DC1, rack B-14 per code comment) | `AppConfig.java:9-11` |
+| `jdbc:mysql://dc1-mysql-prd03.corp.meridianaero.com:3306/sqp_prod` | dc1-mysql-prd03 (DC1, rack B-14 per code comment at `AppConfig.java:9`) | `AppConfig.java:10-11` |
 | `dc1-smtp-relay01.corp.meridianaero.com:25` (SMTP) | dc1-smtp-relay01 | `AppConfig.java:16-17` |
-| `http://dc1-wls-app07.corp.meridianaero.com:7001/SupplierMaster/SupplierMasterService?WSDL` (SOAP) | dc1-wls-app07 (WebLogic 10.3) | `AppConfig.java:26-28` |
-| `http://localhost:8080/sqp/nightlyExport.do` (cron curl target) | dc1-tomcat-app02 | `NightlyExportAction.java:25`; `README.md:14` |
+| `http://dc1-wls-app07.corp.meridianaero.com:7001/SupplierMaster/SupplierMasterService?WSDL` (SOAP) | dc1-wls-app07 (WebLogic 10.3) | `AppConfig.java:27-28` |
+| `http://localhost:8080/sqp/nightlyExport.do` (cron curl target) | dc1-tomcat-app02 | `NightlyExportAction.java:25`; `README.md:14`, `README.md:26-28` |
 | Deployment hosts: `dc1-tomcat-app02.corp.meridianaero.com` (prod), `dc1-tomcat-qa01` (QA) | dc1-tomcat-app02 / dc1-tomcat-qa01 | `README.md:14`, `README.md:33-34` |
 
 ### File-system dependencies
@@ -62,7 +62,7 @@ The Supplier Quality Portal (SQP) is an internal Struts 1.2 web application used
 
 | Credential | Location |
 |---|---|
-| MySQL user `sqp_app`, password `Sqp$Prd2014` (production) | `AppConfig.java:12-13` |
+| MySQL user `sqp_app` with plaintext production password (redacted) | `AppConfig.java:12-13` |
 
 Note also: passwords in the `app_user` table are stored as unsalted MD5 (`LoginAction.java:28-31`) — a security finding adjacent to, but distinct from, credentials-in-source.
 
