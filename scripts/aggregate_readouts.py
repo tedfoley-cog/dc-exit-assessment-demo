@@ -45,6 +45,15 @@ def parse_front_matter(path):
     return meta
 
 
+def strip_front_matter(text):
+    lines = text.splitlines()
+    if lines and lines[0].strip() == "---":
+        for i, line in enumerate(lines[1:], start=1):
+            if line.strip() == "---":
+                return "\n".join(lines[i + 1:]).strip()
+    return text.strip()
+
+
 def load_readouts():
     if not READOUTS.is_dir():
         return []
@@ -55,6 +64,7 @@ def load_readouts():
             print(f"warning: {path.name} has no front-matter, skipping", file=sys.stderr)
             continue
         meta["_file"] = path.name
+        meta["_body"] = strip_front_matter(path.read_text(encoding="utf-8"))
         readouts.append(meta)
     return readouts
 
@@ -96,7 +106,7 @@ def write_html(readouts):
             f"<td class='num'>{html.escape(r.get('blockers', '?'))}</td>"
             f"<td class='num'>{html.escape(r.get('majors', '?'))}</td>"
             f"<td class='num'>{html.escape(r.get('backlog_items', '?'))}</td>"
-            f"<td><a href='readouts/{html.escape(r['_file'])}'>readout</a></td>"
+            f"<td><a href='#readout-{html.escape(r.get('app_id', r['_file']))}'>readout</a></td>"
             "</tr>"
         )
     doc = f"""<!DOCTYPE html>
@@ -121,6 +131,13 @@ def write_html(readouts):
   td.num {{ text-align: center; }}
   .badge {{ color: #fff; padding: .15rem .5rem; border-radius: 4px;
             font-size: .75rem; font-weight: 600; }}
+  section.readout {{ background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;
+                     margin-top: 2rem; padding: 1rem 1.5rem; }}
+  section.readout h2 {{ font-size: 1.1rem; border-bottom: 1px solid #e2e8f0;
+                        padding-bottom: .5rem; }}
+  section.readout pre {{ white-space: pre-wrap; word-break: break-word;
+                         font-size: .8rem; line-height: 1.5; background: #f8fafc;
+                         border: 1px solid #e2e8f0; border-radius: 6px; padding: 1rem; }}
 </style>
 </head>
 <body>
@@ -134,12 +151,27 @@ def write_html(readouts):
 <th>Blockers</th><th>Majors</th><th>Backlog</th><th>Detail</th></tr>
 {''.join(rows_html)}
 </table>
+{''.join(readout_sections(readouts))}
 </main>
 </body>
 </html>
 """
     REPORT.write_text(doc, encoding="utf-8")
     print(f"\nHTML report written to {REPORT}")
+
+
+def readout_sections(readouts):
+    sections = []
+    for r in readouts:
+        app_id = r.get("app_id", r["_file"])
+        sections.append(
+            f"<section class='readout' id='readout-{html.escape(app_id)}'>"
+            f"<h2>{html.escape(r.get('app_name', app_id))} "
+            f"<small>({html.escape(r['_file'])})</small></h2>"
+            f"<pre>{html.escape(r.get('_body', ''))}</pre>"
+            "</section>"
+        )
+    return sections
 
 
 def main():
