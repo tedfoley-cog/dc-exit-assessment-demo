@@ -37,7 +37,7 @@ The Supplier Quality Portal (SQP) is an internal Struts 1.2 web application used
 
 | Endpoint | DC server | Evidence |
 |---|---|---|
-| `jdbc:mysql://dc1-mysql-prd03.corp.meridianaero.com:3306/sqp_prod` | dc1-mysql-prd03 (DC1, rack B-14 per code comment) | `AppConfig.java:10-11` |
+| `jdbc:mysql://dc1-mysql-prd03.corp.meridianaero.com:3306/sqp_prod` | dc1-mysql-prd03 (DC1, rack B-14 per code comment at `AppConfig.java:9`) | `AppConfig.java:10-11` |
 | `dc1-smtp-relay01.corp.meridianaero.com:25` (SMTP) | dc1-smtp-relay01 | `AppConfig.java:16-17` |
 | `http://dc1-wls-app07.corp.meridianaero.com:7001/SupplierMaster/SupplierMasterService?WSDL` (SOAP) | dc1-wls-app07 (WebLogic 10.3) | `AppConfig.java:27-28` |
 | `http://localhost:8080/sqp/nightlyExport.do` (cron curl target) | dc1-tomcat-app02 | `NightlyExportAction.java:25`; `README.md:14`, `README.md:26-28` |
